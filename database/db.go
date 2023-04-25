@@ -44,7 +44,7 @@ func handleCreateRequiredTables() {
 	userTable := `
 		CREATE TABLE IF NOT EXISTS "users" (
 			id SERIAL PRIMARY KEY,
-			email VARCHAR(255) NOT NULL,
+			email VARCHAR(255) UNIQUE NOT NULL,
 			username VARCHAR(255) NOT NULL,
 			password TEXT NOT NULL,
 			age int NOT NULL,

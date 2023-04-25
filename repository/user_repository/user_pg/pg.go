@@ -19,7 +19,7 @@ const (
 	`
 
 	getUserByEmailQuery = `
-		SELECT id, username, email, password FROM "users"
+		SELECT id, username, email, password,age FROM "users"
 		WHERE email = $1;
 	`
 )
@@ -35,6 +35,10 @@ func NewUserPG(db *sql.DB) user_repository.UserRepository {
 }
 
 func (u *userPG) CreateNewUser(user entity.User) errs.MessageErr {
+	// "username",
+	// 		"email",
+	// 		"password",
+	// 		"age"
 	_, err := u.db.Exec(createUserQuery, user.Username, user.Email, user.Password, user.Age)
 
 	if err != nil {
