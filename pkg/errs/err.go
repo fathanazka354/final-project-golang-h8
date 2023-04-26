@@ -41,8 +41,15 @@ func NewUnauthenticatedError(message string) MessageErr {
 func NewNotFoundError(message string) MessageErr {
 	return &MessageErrData{
 		ErrMessage: message,
-		ErrStatus:  http.StatusNotFound,
-		ErrError:   "NOT_FOUND",
+		ErrStatus:  http.StatusNoContent,
+		ErrError:   "NOT_CONTENT",
+	}
+}
+func NewNotContent(message string) MessageErr {
+	return &MessageErrData{
+		ErrMessage: message,
+		ErrStatus:  http.StatusNoContent,
+		ErrError:   "NOT_CONTENT",
 	}
 }
 func NewBadRequest(message string) MessageErr {

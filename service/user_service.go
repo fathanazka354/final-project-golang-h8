@@ -6,7 +6,6 @@ import (
 	"final-project/pkg/errs"
 	"final-project/pkg/helpers"
 	"final-project/repository/user_repository"
-	"fmt"
 	"net/http"
 )
 
@@ -27,15 +26,12 @@ func NewUserService(userRepo user_repository.UserRepository) UserService {
 
 func (u *userService) Login(payload dto.NewUserRequestLogin) (*dto.LoginResponse, errs.MessageErr) {
 	err := helpers.ValidateStruct(payload)
-	fmt.Println("here4")
 
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("here5")
 
 	user, err := u.userRepo.GetUserByEmail(payload.Email)
-	fmt.Println("here6")
 
 	if err != nil {
 		if err.Status() == http.StatusNotFound {
@@ -43,14 +39,11 @@ func (u *userService) Login(payload dto.NewUserRequestLogin) (*dto.LoginResponse
 		}
 		return nil, err
 	}
-	fmt.Println("here7")
 	isValidPassword := user.ComparePassword(payload.Password)
-	fmt.Println("here8")
 
 	if !isValidPassword {
 		return nil, errs.NewUnauthenticatedError("invalid email/password")
 	}
-	fmt.Println("here9")
 
 	response := dto.LoginResponse{
 		Result:     "success",

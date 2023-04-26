@@ -4,7 +4,6 @@ import (
 	"final-project/dto"
 	"final-project/pkg/errs"
 	"final-project/service"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,25 +42,31 @@ func (uh userHandler) Register(ctx *gin.Context) {
 	ctx.JSON(response.StatusCode, response)
 }
 
+// LoginUser godoc
+// @Summary Login user
+// @Description Login user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Param RequestBody body dto.NewUserRequestLogin true "request body json"
+// @Success 201 {object} dto.NewUserRequestLogin
+// @Router /users/login [post]
 func (uh *userHandler) Login(ctx *gin.Context) {
 	var newUserRequest dto.NewUserRequestLogin
 
-	fmt.Println("here1")
 	if err := ctx.ShouldBindJSON(&newUserRequest); err != nil {
 		errBindJson := errs.NewUnprocessibleEntityError("invalid request body")
 
 		ctx.JSON(errBindJson.Status(), errBindJson)
 		return
 	}
-	fmt.Println("here2")
 
 	result, err := uh.userService.Login(newUserRequest)
-	fmt.Println("here3")
 
 	if err != nil {
 		ctx.JSON(err.Status(), err)
 		return
 	}
-	fmt.Println("here4")
 	ctx.JSON(result.StatusCode, result)
 }

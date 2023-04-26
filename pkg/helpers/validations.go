@@ -3,11 +3,11 @@ package helpers
 import (
 	"final-project/pkg/errs"
 
-	"github.com/asaskevich/govalidator"
+	"github.com/go-playground/validator/v10"
 )
 
 func ValidateStruct(payload interface{}) errs.MessageErr {
-	_, err := govalidator.ValidateStruct(payload)
+	err := validator.New().Struct(payload)
 	if err != nil {
 		return errs.NewBadRequest(err.Error())
 	}

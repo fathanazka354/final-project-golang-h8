@@ -23,15 +23,16 @@ const (
 			photourl,
 			userid
 		) VALUES ($1,$2,$3,$4) 
+		RETURNING id,title, caption, photourl, userId;
 	`
 
 	getPhotosQuery = `
-		SELECT "id", "title", "caption", "photourl", "userid", "createdAt", "updatedAt" FROM "photos"
+		SELECT "id", "title", "caption", "photourl", "userid", "createdat", "updatedat" FROM "photos"
 		ORDER BY "id" ASC
 	`
 
 	getPhotoByIdQuery = `
-		SELECT "id", "title", "caption", "photourl", "userid", "createdAt", "updatedAt" FROM "photos"
+		SELECT "id", "title", "caption", "photourl", "userid", "createdat", "updatedat" FROM "photos"
 		WHERE "id" = $1
 	`
 
@@ -59,13 +60,17 @@ func NewPhotoPG(db *sql.DB) photo_repository.PhotoRepository {
 // UpdatePhoto(photoId int, payload entity.Photo) errs.MessageErr
 // DeletePhoto(photoId int) errs.MessageErr
 
-func (photoPG *photoPG) CreateNewPhoto(payload entity.Photo) errs.MessageErr {
-	_, err := photoPG.db.Exec(createPhotoQuery, payload.Title, payload.Caption, payload.PhotoUrl, payload.UserId)
+func (photoPG *photoPG) CreateNewPhoto(payload *entity.Photo) (*entity.Photo, errs.MessageErr) {
+	row := photoPG.db.QueryRow(createPhotoQuery, payload.Title, payload.Caption, payload.PhotoUrl, payload.UserId)
+
+	var photo entity.Photo
+
+	err := row.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId)
 
 	if err != nil {
-		return errs.NewInternalServerError("something went wrong")
+		return nil, errs.NewInternalServerError("something went wrong")
 	}
-	return nil
+	return &photo, nil
 }
 
 func (photoPG *photoPG) GetPhotoById(photoId int) (*entity.Photo, errs.MessageErr) {
@@ -100,6 +105,9 @@ func (photoPG *photoPG) GetPhotos() ([]*entity.Photo, errs.MessageErr) {
 		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt)
 
 		if err != nil {
+			if err.Error() == sql.ErrNoRows.Error() {
+				return nil, errs.NewNotContent("photo still empty")
+			}
 			return nil, errs.NewInternalServerError("something went wrong")
 		}
 		photos = append(photos, &photo)
@@ -108,7 +116,7 @@ func (photoPG *photoPG) GetPhotos() ([]*entity.Photo, errs.MessageErr) {
 }
 
 func (photoPG *photoPG) UpdatePhoto(photoId int, payload entity.Photo) errs.MessageErr {
-	_, err := photoPG.db.Exec(updatePhotoByIdQuery, payload.Title, payload.Caption, payload.PhotoUrl, payload.Id)
+	_, err := photoPG.db.Exec(updatePhotoByIdQuery, payload.Title, payload.Caption, payload.PhotoUrl, photoId)
 
 	if err != nil {
 		return errs.NewInternalServerError("something went wrong")
